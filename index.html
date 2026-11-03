@@ -236,10 +236,6 @@ if (moving) walkTime += dt * 10;
 
 let swing = moving ? Math.sin(walkTime) * 0.55 : 0;
 
-parts[4].rotation.x = swing;
-parts[8].rotation.x = -swing;
-parts[6].rotation.x = -swing;
-parts[10].rotation.x = swing;
  let target=inCar?car.position:player.position;let angle=inCar?car.rotation.y:player.rotation.y;let desired=new THREE.Vector3(target.x-Math.sin(angle)*9, target.y+5.5, target.z-Math.cos(angle)*9);camera.position.lerp(desired,.09);camera.lookAt(target.x,target.y+1.2,target.z);
 }
 // Gamepad API: Xbox / PlayStation / универсальные Bluetooth-контроллеры.
