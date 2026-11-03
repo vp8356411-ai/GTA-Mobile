@@ -63,12 +63,96 @@ for(let x=-90;x<=90;x+=22)for(let z=-90;z<=90;z+=22){if(Math.abs(x)<13||Math.abs
  for(let y=3;y<h-2;y+=4){for(let sx=-w/2+2;sx<w/2-1;sx+=3){let win=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.5,.08),winmat);win.position.set(x+sx,y,z+d/2+.06);scene.add(win)}}
 }
 for(let i=-100;i<=100;i+=10){if(Math.abs(i)<10)continue;box(.16,.2,1.1,mats.white,i,.13,8);box(1.1,.2,.16,mats.white,8,.13,i)}
-// player
-const player=new THREE.Group();scene.add(player);
-let torso=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,1.15,10),mats.shirt);torso.position.y=1.35;torso.castShadow=true;player.add(torso);
-let head=new THREE.Mesh(new THREE.SphereGeometry(.32,14,12),mats.skin);head.position.y=2.15;head.castShadow=true;player.add(head);
-for(let s of [-1,1]){let leg=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.3),mats.black);leg.position.set(s*.2,.42,0);player.add(leg)}
-player.position.set(-4,0,-5);
+
+// player — GTA Mobile
+const player = new THREE.Group();
+scene.add(player);
+
+const hero = new THREE.Group();
+player.add(hero);
+
+// Тело
+const torso = new THREE.Mesh(
+  new THREE.CylinderGeometry(.34, .46, 1.05, 12),
+  mats.black
+);
+torso.position.y = 1.35;
+torso.castShadow = true;
+hero.add(torso);
+
+// Голова
+const head = new THREE.Mesh(
+  new THREE.SphereGeometry(.29, 16, 14),
+  mats.skin
+);
+head.position.y = 2.12;
+head.castShadow = true;
+hero.add(head);
+
+// Волосы
+const hair = new THREE.Mesh(
+  new THREE.SphereGeometry(.30, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2),
+  mats.black
+);
+hair.position.y = 2.19;
+hero.add(hair);
+
+// Шея
+const neck = new THREE.Mesh(
+  new THREE.CylinderGeometry(.11, .13, .18, 10),
+  mats.skin
+);
+neck.position.y = 1.91;
+hero.add(neck);
+
+// Руки
+for (const s of [-1, 1]) {
+  const arm = new THREE.Mesh(
+    new THREE.CylinderGeometry(.10, .12, .78, 10),
+    mats.black
+  );
+  arm.position.set(s * .43, 1.36, 0);
+  arm.rotation.z = s * -.12;
+  arm.castShadow = true;
+  hero.add(arm);
+
+  const hand = new THREE.Mesh(
+    new THREE.SphereGeometry(.105, 10, 8),
+    mats.skin
+  );
+  hand.position.set(s * .48, .94, 0);
+  hero.add(hand);
+
+  // Ноги
+  const leg = new THREE.Mesh(
+    new THREE.BoxGeometry(.23, .68, .27),
+    mats.black
+  );
+  leg.position.set(s * .19, .48, 0);
+  leg.castShadow = true;
+  hero.add(leg);
+
+  // Белые кроссовки
+  const shoe = new THREE.Mesh(
+    new THREE.BoxGeometry(.27, .14, .40),
+    mats.white || mats.skin
+  );
+  shoe.position.set(s * .19, .10, -.07);
+  hero.add(shoe);
+}
+
+// Очки
+for (const s of [-1, 1]) {
+  const lens = new THREE.Mesh(
+    new THREE.BoxGeometry(.20, .10, .045),
+    mats.black
+  );
+  lens.position.set(s * .13, 2.13, -.255);
+  hero.add(lens);
+}
+
+player.position.set(-4, 0, -5);
+
 // car group
 let car=new THREE.Group();scene.add(car);car.position.set(4,0,-7);
 const paint=new THREE.MeshStandardMaterial({color:0xc52c28,metalness:.58,roughness:.27});
