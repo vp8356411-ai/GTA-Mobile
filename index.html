@@ -227,9 +227,19 @@ window.openPanel=(type)=>{panel.style.display='flex';choices.innerHTML='';
  let data={maps:['Город','Вечерний город','Ночной город'],skins:['Бирюзовая одежда','Красная одежда','Золотая одежда'],mods:['Машины: ВКЛ','Карты: ВКЛ','Скины: ВКЛ']}[type];title.textContent={maps:'🗺 Выбор карты',skins:'👕 Выбор скина',mods:'⚙ Встроенные моды'}[type];
  data.forEach((name,i)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=name+'<span>Нажми, чтобы применить</span>';b.onclick=()=>{if(type==='maps'){let c=[0x91b8d0,0xe8a46d,0x17243e][i];scene.background.setHex(c);scene.fog.color.setHex(c);toast(name+' загружена')}if(type==='skins'){let c=[0x22a6a1,0xb83232,0xc69b26][i];mats.shirt.color.setHex(c);toast(name+' применён')}if(type==='mods')toast(name);};choices.appendChild(b)})};
 window.closePanel=()=>panel.style.display='none';
-function update(dt){let forward=keys['w']||keys['arrowup'],back=keys['s']||keys['arrowdown'],left=keys['a']||keys['arrowleft'],right=keys['d']||keys['arrowright'];
+function update(dt)let walkTime = 0;{let forward=keys['w']||keys['arrowup'],back=keys['s']||keys['arrowdown'],left=keys['a']||keys['arrowleft'],right=keys['d']||keys['arrowright'];
  if(inCar){if(forward)speed=Math.min(speed+dt*10,18);else if(back)speed=Math.max(speed-dt*14,-7);else speed*=.96;if(left)car.rotation.y+=dt*(speed>=0?1:-1)*1.7;if(right)car.rotation.y-=dt*(speed>=0?1:-1)*1.7;car.position.x+=Math.sin(car.rotation.y)*speed*dt;car.position.z+=Math.cos(car.rotation.y)*speed*dt;wheels.forEach(w=>w.rotation.x+=speed*dt*2)}
- else{let v=8*dt,dx=(right?1:0)-(left?1:0),dz=(back?1:0)-(forward?1:0);if(dx||dz){let a=Math.atan2(dx,dz);player.rotation.y=a;player.position.x+=Math.sin(a)*v;player.position.z+=Math.cos(a)*v}}
+ else{let v=8*dt,dx=(right?1:0)-(left?1:0),dz=(back?1:0)-(forward?1:0);if(dx||dz){let a=Math.atan2(dx,dz);player.rotation.y=a;player.position.x+=Math.sin(a)*v;player.position.z+=Math.cos(a)*v}}let moving = !!(dx || dz);
+let parts = player.children[0].children;
+
+if (moving) walkTime += dt * 10;
+
+let swing = moving ? Math.sin(walkTime) * 0.55 : 0;
+
+parts[4].rotation.x = swing;
+parts[8].rotation.x = -swing;
+parts[6].rotation.x = -swing;
+parts[10].rotation.x = swing;
  let target=inCar?car.position:player.position;let angle=inCar?car.rotation.y:player.rotation.y;let desired=new THREE.Vector3(target.x-Math.sin(angle)*9, target.y+5.5, target.z-Math.cos(angle)*9);camera.position.lerp(desired,.09);camera.lookAt(target.x,target.y+1.2,target.z);
 }
 // Gamepad API: Xbox / PlayStation / универсальные Bluetooth-контроллеры.
@@ -241,7 +251,7 @@ function pollGamepad(){const pads=navigator.getGamepads?navigator.getGamepads():
 }
 window.addEventListener('gamepadconnected',()=>toast('Геймпад подключён'));window.addEventListener('gamepaddisconnected',()=>toast('Геймпад отключён'));
 applyQuality(quality);
-let last=performance.now(),frameCount=0;function loop(now){let dt=Math.min((now-last)/1000,.04);last=now;pollGamepad();update(dt);renderer.render(scene,camera);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+=requestAnimationFrame(loop)}requestAnimationFrame(loop);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 toast('Добро пожаловать в GTA Web Mods!');
