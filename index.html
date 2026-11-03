@@ -46,9 +46,7 @@ const root=document.querySelector('#game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x91b8d0);scene.fog=new THREE.Fog(0x91b8d0,55,180);
 const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,400);
 const renderer=new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;root.appendChild(renderer.domElement);
-let quality = ['low','high','ultra'].includes(localStorage.getItem('gtaQuality'))
-  ? localStorage.getItem('gtaQuality')
-  : 'low';
+let quality=localStorage.getItem('gtaQuality')||'high';
 function applyQuality(q){quality=q;localStorage.setItem('gtaQuality',q);const cfg={low:{pixel:.85,shadows:false,fog:125},high:{pixel:1.25,shadows:true,fog:180},ultra:{pixel:1.7,shadows:true,fog:230}}[q];renderer.setPixelRatio(Math.min(devicePixelRatio,cfg.pixel));renderer.shadowMap.enabled=cfg.shadows;scene.fog.far=cfg.fog;renderer.setSize(innerWidth,innerHeight);toast('Графика: '+({low:'экономная',high:'высокая',ultra:'максимальная'}[q]));}
 scene.add(new THREE.HemisphereLight(0xd9edff,0x48505a,2));
 const sun=new THREE.DirectionalLight(0xfff0d7,2.2);sun.position.set(-35,60,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
@@ -65,96 +63,12 @@ for(let x=-90;x<=90;x+=22)for(let z=-90;z<=90;z+=22){if(Math.abs(x)<13||Math.abs
  for(let y=3;y<h-2;y+=4){for(let sx=-w/2+2;sx<w/2-1;sx+=3){let win=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.5,.08),winmat);win.position.set(x+sx,y,z+d/2+.06);scene.add(win)}}
 }
 for(let i=-100;i<=100;i+=10){if(Math.abs(i)<10)continue;box(.16,.2,1.1,mats.white,i,.13,8);box(1.1,.2,.16,mats.white,8,.13,i)}
-
-// player — GTA Mobile
-const player = new THREE.Group();
-scene.add(player);
-
-const hero = new THREE.Group();
-player.add(hero);
-
-// Тело
-const torso = new THREE.Mesh(
-  new THREE.CylinderGeometry(.34, .46, 1.05, 12),
-  mats.black
-);
-torso.position.y = 1.35;
-torso.castShadow = true;
-hero.add(torso);
-
-// Голова
-const head = new THREE.Mesh(
-  new THREE.SphereGeometry(.29, 16, 14),
-  mats.skin
-);
-head.position.y = 2.12;
-head.castShadow = true;
-hero.add(head);
-
-// Волосы
-const hair = new THREE.Mesh(
-  new THREE.SphereGeometry(.30, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2),
-  mats.black
-);
-hair.position.y = 2.19;
-hero.add(hair);
-
-// Шея
-const neck = new THREE.Mesh(
-  new THREE.CylinderGeometry(.11, .13, .18, 10),
-  mats.skin
-);
-neck.position.y = 1.91;
-hero.add(neck);
-
-// Руки
-for (const s of [-1, 1]) {
-  const arm = new THREE.Mesh(
-    new THREE.CylinderGeometry(.10, .12, .78, 10),
-    mats.black
-  );
-  arm.position.set(s * .43, 1.36, 0);
-  arm.rotation.z = s * -.12;
-  arm.castShadow = true;
-  hero.add(arm);
-
-  const hand = new THREE.Mesh(
-    new THREE.SphereGeometry(.105, 10, 8),
-    mats.skin
-  );
-  hand.position.set(s * .48, .94, 0);
-  hero.add(hand);
-
-  // Ноги
-  const leg = new THREE.Mesh(
-    new THREE.BoxGeometry(.23, .68, .27),
-    mats.black
-  );
-  leg.position.set(s * .19, .48, 0);
-  leg.castShadow = true;
-  hero.add(leg);
-
-  // Белые кроссовки
-  const shoe = new THREE.Mesh(
-    new THREE.BoxGeometry(.27, .14, .40),
-    mats.white || mats.skin
-  );
-  shoe.position.set(s * .19, .10, -.07);
-  hero.add(shoe);
-}
-
-// Очки
-for (const s of [-1, 1]) {
-  const lens = new THREE.Mesh(
-    new THREE.BoxGeometry(.20, .10, .045),
-    mats.black
-  );
-  lens.position.set(s * .13, 2.13, -.255);
-  hero.add(lens);
-}
-
-player.position.set(-4, 0, -5);
-
+// player
+const player=new THREE.Group();scene.add(player);
+let torso=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,1.15,10),mats.shirt);torso.position.y=1.35;torso.castShadow=true;player.add(torso);
+let head=new THREE.Mesh(new THREE.SphereGeometry(.32,14,12),mats.skin);head.position.y=2.15;head.castShadow=true;player.add(head);
+for(let s of [-1,1]){let leg=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.3),mats.black);leg.position.set(s*.2,.42,0);player.add(leg)}
+player.position.set(-4,0,-5);
 // car group
 let car=new THREE.Group();scene.add(car);car.position.set(4,0,-7);
 const paint=new THREE.MeshStandardMaterial({color:0xc52c28,metalness:.58,roughness:.27});
@@ -229,52 +143,17 @@ window.openPanel=(type)=>{panel.style.display='flex';choices.innerHTML='';
  let data={maps:['Город','Вечерний город','Ночной город'],skins:['Бирюзовая одежда','Красная одежда','Золотая одежда'],mods:['Машины: ВКЛ','Карты: ВКЛ','Скины: ВКЛ']}[type];title.textContent={maps:'🗺 Выбор карты',skins:'👕 Выбор скина',mods:'⚙ Встроенные моды'}[type];
  data.forEach((name,i)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=name+'<span>Нажми, чтобы применить</span>';b.onclick=()=>{if(type==='maps'){let c=[0x91b8d0,0xe8a46d,0x17243e][i];scene.background.setHex(c);scene.fog.color.setHex(c);toast(name+' загружена')}if(type==='skins'){let c=[0x22a6a1,0xb83232,0xc69b26][i];mats.shirt.color.setHex(c);toast(name+' применён')}if(type==='mods')toast(name);};choices.appendChild(b)})};
 window.closePanel=()=>panel.style.display='none';
-function update(dt)let walkTime = 0;{let forward=keys['w']||keys['arrowup'],back=keys['s']||keys['arrowdown'],left=keys['a']||keys['arrowleft'],right=keys['d']||keys['arrowright'];
+function update(dt){let forward=keys['w']||keys['arrowup'],back=keys['s']||keys['arrowdown'],left=keys['a']||keys['arrowleft'],right=keys['d']||keys['arrowright'];
  if(inCar){if(forward)speed=Math.min(speed+dt*10,18);else if(back)speed=Math.max(speed-dt*14,-7);else speed*=.96;if(left)car.rotation.y+=dt*(speed>=0?1:-1)*1.7;if(right)car.rotation.y-=dt*(speed>=0?1:-1)*1.7;car.position.x+=Math.sin(car.rotation.y)*speed*dt;car.position.z+=Math.cos(car.rotation.y)*speed*dt;wheels.forEach(w=>w.rotation.x+=speed*dt*2)}
- else{let v=8*dt,dx=(right?1:0)-(left?1:0),dz=(back?1:0)-(forward?1:0);if(dx||dz){let a=Math.atan2(dx,dz);player.rotation.y=a;player.position.x+=Math.sin(a)*v;player.position.z+=Math.cos(a)*v}}let moving = !!(dx || dz);
-
-function update(dt) {
-  let forward = keys['w'] || keys['arrowup'];
-  let back = keys['s'] || keys['arrowdown'];
-  let left = keys['a'] || keys['arrowleft'];
-  let right = keys['d'] || keys['arrowright'];
-
-  if (inCar) {
-    if (forward) speed = Math.min(speed + dt * 10, 18);
-    else if (back) speed = Math.max(speed - dt * 14, -7);
-    else speed *= 0.96;
-
-    if (left) car.rotation.y += dt * (speed >= 0 ? 1 : -1) * 1.7;
-    if (right) car.rotation.y -= dt * (speed >= 0 ? 1 : -1) * 1.7;
-
-    car.position.x += Math.sin(car.rotation.y) * speed * dt;
-    car.position.z += Math.cos(car.rotation.y) * speed * dt;
-
-    wheels.forEach(w => w.rotation.x += speed * dt * 2);
-  } else {
-    let v = 8 * dt;
-    let dx = (right ? 1 : 0) - (left ? 1 : 0);
-    let dz = (back ? 1 : 0) - (forward ? 1 : 0);
-
-    if (dx || dz) {
-      let a = Math.atan2(dx, dz);
-      player.rotation.y = a;
-      player.position.x += Math.sin(a) * v;
-      player.position.z += Math.cos(a) * v;
-    }
-  }
-
-  let target = inCar ? car.position : player.position;
-  let angle = inCar ? car.rotation.y : player.rotation.y;
-
-  let desired = new THREE.Vector3(
-    target.x - Math.sin(angle) * 9,
-    target.y + 5.5,
-    target.z - Math.cos(angle) * 9
-  );
-
-  camera.position.lerp(desired, 0.09);
-  camera.lookAt(target.x, target.y + 1.2, target.z);
+ else{let v=8*dt,dx=(right?1:0)-(left?1:0),dz=(back?1:0)-(forward?1:0);if(dx||dz){let a=Math.atan2(dx,dz);player.rotation.y=a;player.position.x+=Math.sin(a)*v;player.position.z+=Math.cos(a)*v}}
+ let target=inCar?car.position:player.position;let angle=inCar?car.rotation.y:player.rotation.y;let desired=new THREE.Vector3(target.x-Math.sin(angle)*9, target.y+5.5, target.z-Math.cos(angle)*9);camera.position.lerp(desired,.09);camera.lookAt(target.x,target.y+1.2,target.z);
+}
+// Gamepad API: Xbox / PlayStation / универсальные Bluetooth-контроллеры.
+let gamepadSeen=false;
+function pollGamepad(){const pads=navigator.getGamepads?navigator.getGamepads():[];const gp=Array.from(pads||[]).find(Boolean);if(!gp)return;gamepadSeen=true;const ax=gp.axes||[];const btn=gp.buttons||[];const dead=.22;const lx=Math.abs(ax[0]||0)>dead?ax[0]:0;const ly=Math.abs(ax[1]||0)>dead?ax[1]:0;
+ keys['arrowup']=ly<-.25||!!(btn[7]&&btn[7].pressed);keys['arrowdown']=ly>.25||!!(btn[6]&&btn[6].pressed);keys['arrowleft']=lx<-.25;keys['arrowright']=lx>.25;
+ if(btn[0]?.pressed&&!pollGamepad.a){pollGamepad.a=true;if(!inCar)document.querySelector('#jumpBtn').click();}if(!btn[0]?.pressed)pollGamepad.a=false;
+ if((btn[2]?.pressed||btn[1]?.pressed)&&!pollGamepad.b){pollGamepad.b=true;toggleCar();}if(!btn[2]?.pressed&&!btn[1]?.pressed)pollGamepad.b=false;
 }
 window.addEventListener('gamepadconnected',()=>toast('Геймпад подключён'));window.addEventListener('gamepaddisconnected',()=>toast('Геймпад отключён'));
 applyQuality(quality);
