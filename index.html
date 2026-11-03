@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>GTA Web Mods Mobile — V2.0</title>
+<meta name="theme-color" content="#101a28">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GTA Web Mods">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10151d;color:#fff;font-family:Arial,sans-serif}
+#game{position:absolute;inset:0}canvas{display:block}
+#top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.logo{font-weight:900;letter-spacing:1px;text-shadow:0 2px 8px #000;font-size:18px}.logo small{display:block;font-size:10px;color:#8ee6ff;letter-spacing:3px;margin-top:3px}
+#hint{background:#0009;padding:9px 12px;border-radius:10px;font-size:12px;max-width:55%;text-align:right}
+#menu{position:absolute;right:12px;top:76px;display:flex;gap:7px;flex-direction:column}
+button{border:1px solid #ffffff35;background:#101a28dd;color:#fff;border-radius:10px;padding:10px 13px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px)}
+button:active{transform:scale(.97)}#panel{display:none;position:absolute;inset:0;background:#000b;align-items:center;justify-content:center;padding:18px}
+.card{width:min(440px,100%);background:#172231;border:1px solid #ffffff25;border-radius:18px;padding:20px;box-shadow:0 20px 70px #000}
+.card h2{margin:0 0 12px}.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px}.choice{padding:14px;text-align:left;min-height:65px}.choice span{display:block;color:#aab8c9;font-size:11px;margin-top:5px}
+#controls{position:absolute;bottom:18px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:end;pointer-events:none}
+.pad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,45px);gap:5px;pointer-events:auto}
+.pad button,.action button{background:#101a28bb;touch-action:none;user-select:none}
+.pad button{font-size:18px;padding:0}.action{display:flex;gap:8px;pointer-events:auto}.action button{min-width:66px;min-height:54px}
+#toast{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:#000b;padding:10px 15px;border-radius:10px;font-size:13px;display:none;white-space:nowrap}
+@media(min-width:800px){#controls{opacity:.75}.pad button{width:54px;height:48px}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="top"><div class="logo">GTA WEB MODS<small>MOBILE EDITION • V2.1</small></div><div id="hint">WASD / стрелки — движение<br>Е — сесть или выйти<br>Автопарк: 7 моделей</div></div>
+<div id="menu"><button onclick="openPanel('garage')">🛠 Гараж</button><button onclick="openPanel('cars')">🚘 Автопарк</button><button onclick="openPanel('maps')">🗺 Карты</button><button onclick="openPanel('skins')">👕 Скины</button><button onclick="openPanel('mods')">⚙ Моды</button><button onclick="openPanel('settings')">🎮 Управление / графика</button></div>
+<div id="panel"><div class="card"><h2 id="panelTitle">Меню</h2><div class="choices" id="choices"></div><p style="color:#9eacbd;font-size:12px;margin-bottom:0">Мобильная версия V2.1. Настройки сохраняются на устройстве.</p><p style="text-align:right"><button onclick="closePanel()">Закрыть</button></p></div></div>
+<div id="controls">
+ <div class="pad">
+  <span></span><button data-key="ArrowUp">▲</button><span></span>
+  <button data-key="ArrowLeft">◀</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button>
+ </div>
+ <div class="action"><button id="enterBtn">Войти<br>Е</button><button id="jumpBtn">Прыжок</button></div>
+</div>
+<div id="toast"></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const root=document.querySelector('#game');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x91b8d0);scene.fog=new THREE.Fog(0x91b8d0,55,180);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,400);
+const renderer=new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;root.appendChild(renderer.domElement);
+let quality=localStorage.getItem('gtaQuality')||'high';
+function applyQuality(q){quality=q;localStorage.setItem('gtaQuality',q);const cfg={low:{pixel:.85,shadows:false,fog:125},high:{pixel:1.25,shadows:true,fog:180},ultra:{pixel:1.7,shadows:true,fog:230}}[q];renderer.setPixelRatio(Math.min(devicePixelRatio,cfg.pixel));renderer.shadowMap.enabled=cfg.shadows;scene.fog.far=cfg.fog;renderer.setSize(innerWidth,innerHeight);toast('Графика: '+({low:'экономная',high:'высокая',ultra:'максимальная'}[q]));}
+scene.add(new THREE.HemisphereLight(0xd9edff,0x48505a,2));
+const sun=new THREE.DirectionalLight(0xfff0d7,2.2);sun.position.set(-35,60,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
+const mats={road:new THREE.MeshStandardMaterial({color:0x303740,roughness:.95}),side:new THREE.MeshStandardMaterial({color:0x777d7e}),grass:new THREE.MeshStandardMaterial({color:0x547b4b}),white:new THREE.MeshStandardMaterial({color:0xe7e4d8}),glass:new THREE.MeshStandardMaterial({color:0x263f51,metalness:.3,roughness:.2}),black:new THREE.MeshStandardMaterial({color:0x15191d}),skin:new THREE.MeshStandardMaterial({color:0xd5a27b}),shirt:new THREE.MeshStandardMaterial({color:0x22a6a1})};
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(240,240),mats.grass);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+function box(w,h,d,mat,x,y,z){let m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;scene.add(m);return m}
+function road(x,z,w,d){box(w,.12,d,mats.road,x,.02,z);if(w>d){for(let i=-Math.floor(w/10);i<=Math.floor(w/10);i++)box(3,.025,.18,mats.white,x+i*10,.09,z)}else{for(let i=-Math.floor(d/10);i<=Math.floor(d/10);i++)box(.18,.025,3,mats.white,x,.09,z+i*10)}}
+road(0,0,220,15);road(0,0,15,220);road(0,55,220,12);road(55,0,12,220);
+const buildingMats=[0x9b9a91,0x777f89,0xc2b8a2,0x687c82,0x9a7770].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.9}));
+for(let x=-90;x<=90;x+=22)for(let z=-90;z<=90;z+=22){if(Math.abs(x)<13||Math.abs(z)<13||Math.abs(x-55)<10||Math.abs(z-55)<10)continue;
+ let h=8+Math.random()*24,w=10+Math.random()*5,d=10+Math.random()*5;let b=box(w,h,d,buildingMats[Math.floor(Math.random()*buildingMats.length)],x,h/2,z);
+ // rows of simple window strips
+ let winmat=new THREE.MeshStandardMaterial({color:0x9dd6e7,emissive:0x18313c,roughness:.35});
+ for(let y=3;y<h-2;y+=4){for(let sx=-w/2+2;sx<w/2-1;sx+=3){let win=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.5,.08),winmat);win.position.set(x+sx,y,z+d/2+.06);scene.add(win)}}
+}
+for(let i=-100;i<=100;i+=10){if(Math.abs(i)<10)continue;box(.16,.2,1.1,mats.white,i,.13,8);box(1.1,.2,.16,mats.white,8,.13,i)}
+// player
+const player=new THREE.Group();scene.add(player);
+let torso=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,1.15,10),mats.shirt);torso.position.y=1.35;torso.castShadow=true;player.add(torso);
+let head=new THREE.Mesh(new THREE.SphereGeometry(.32,14,12),mats.skin);head.position.y=2.15;head.castShadow=true;player.add(head);
+for(let s of [-1,1]){let leg=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.3),mats.black);leg.position.set(s*.2,.42,0);player.add(leg)}
+player.position.set(-4,0,-5);
+// car group
+let car=new THREE.Group();scene.add(car);car.position.set(4,0,-7);
+const paint=new THREE.MeshStandardMaterial({color:0xc52c28,metalness:.58,roughness:.27});
+let body,cabin,wheels=[],rims=[];
+const vehicleDefs=[
+ {name:'BMW',type:'Спортивный седан',color:0x2866b7,length:4.45,width:2.05,height:.62,cabin:1.95,roof:1.35,style:0},
+ {name:'Mercedes',type:'Премиальный купе',color:0x777f8b,length:4.55,width:2.08,height:.62,cabin:1.9,roof:1.32,style:1},
+ {name:'Lada',type:'Классика',color:0xd4d5d1,length:4.0,width:1.82,height:.66,cabin:2.0,roof:1.42,style:2},
+ {name:'Toyota',type:'Городской спорткар',color:0xc72e2e,length:4.25,width:1.95,height:.58,cabin:1.85,roof:1.3,style:0},
+ {name:'Nissan',type:'Японское купе',color:0x1d8c83,length:4.35,width:2.0,height:.57,cabin:1.75,roof:1.28,style:1},
+ {name:'Porsche',type:'Низкий спорткар',color:0xd6a52b,length:4.1,width:2.0,height:.55,cabin:1.55,roof:1.22,style:2},
+ {name:'Lamborghini',type:'Суперкар',color:0x9dbd28,length:4.5,width:2.12,height:.48,cabin:1.55,roof:1.18,style:3}
+];
+let selectedVehicle=0;
+let inCar=false,speed=0,carColor=0xc52c28,skinColor=0x22a6a1,worldTint=0x91b8d0;
+let garage={model:0,color:vehicleDefs[0].color,rim:0xb8c1ca,ride:0};
+try{garage={...garage,...JSON.parse(localStorage.getItem('gtaWebGarage')||'{}')}}catch(e){}
+function buildVehicle(){
+ while(car.children.length)car.remove(car.children[0]);
+ wheels=[];rims=[];
+ const v=vehicleDefs[selectedVehicle],L=v.length,W=v.width;
+ paint.color.setHex(garage.color);
+ body=new THREE.Mesh(new THREE.BoxGeometry(W,.62,L),paint);body.position.y=.73+garage.ride*.2;body.castShadow=true;body.receiveShadow=true;car.add(body);
+ cabin=new THREE.Mesh(new THREE.BoxGeometry(W*.78,v.roof,v.cabin),mats.glass);
+ cabin.position.set(0,1.34+garage.ride*.2,-.12);cabin.castShadow=true;car.add(cabin);
+ // Bonnet, bumpers, grille and lights make each silhouette read as a distinct class.
+ const dark=new THREE.MeshStandardMaterial({color:0x171b20,metalness:.35,roughness:.45});
+ const chrome=new THREE.MeshStandardMaterial({color:0xc5ccd2,metalness:.85,roughness:.2});
+ const lamp=new THREE.MeshStandardMaterial({color:0xeaf6ff,emissive:0x7b9cac,emissiveIntensity:.35});
+ const redLamp=new THREE.MeshStandardMaterial({color:0xc51f24,emissive:0x500000});
+ const frontZ=L/2+.035;
+ let grille=new THREE.Mesh(new THREE.BoxGeometry(W*.34,.2,.07),selectedVehicle===0?chrome:dark);grille.position.set(0,.72+garage.ride*.2,frontZ);car.add(grille);
+ for(let side of [-1,1]){
+  let head=new THREE.Mesh(new THREE.BoxGeometry(W*.2,.16,.08),lamp);head.position.set(side*W*.34,.86+garage.ride*.2,frontZ);car.add(head);
+  let tail=new THREE.Mesh(new THREE.BoxGeometry(W*.2,.16,.08),redLamp);tail.position.set(side*W*.34,.86+garage.ride*.2,-L/2-.04);car.add(tail);
+ }
+ let bumper=new THREE.Mesh(new THREE.BoxGeometry(W*1.02,.16,.22),chrome);bumper.position.set(0,.48+garage.ride*.2,L/2);car.add(bumper);
+ let rearBumper=bumper.clone();rearBumper.position.z=-L/2;car.add(rearBumper);
+ for(let x of [-W*.53,W*.53])for(let z of [-L*.31,L*.31]){
+  let wh=new THREE.Mesh(new THREE.CylinderGeometry(.39,.39,.27,20),mats.black);wh.rotation.z=Math.PI/2;wh.position.set(x,.4+garage.ride*.2,z);wh.castShadow=true;car.add(wh);wheels.push(wh);
+  let rim=new THREE.Mesh(new THREE.CylinderGeometry(.23,.23,.29,14),new THREE.MeshStandardMaterial({color:garage.rim,metalness:.85,roughness:.2}));rim.rotation.z=Math.PI/2;rim.position.copy(wh.position);car.add(rim);rims.push(rim);
+ }
+}
+function applyGarage(){paint.color.setHex(garage.color);buildVehicle();}
+function saveGarage(){try{localStorage.setItem('gtaWebGarage',JSON.stringify({...garage,selectedVehicle}));toast('Машина и тюнинг сохранены!')}catch(e){toast('Не удалось сохранить настройки')}}
+try{const saved=JSON.parse(localStorage.getItem('gtaWebGarage')||'{}');garage={...garage,...saved};if(Number.isInteger(saved.selectedVehicle)&&saved.selectedVehicle>=0&&saved.selectedVehicle<vehicleDefs.length)selectedVehicle=saved.selectedVehicle;}catch(e){}
+applyGarage();
+const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key.toLowerCase()==='e')toggleCar();if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault()});
+addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k.toLowerCase()]=true});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>keys[k.toLowerCase()]=false))});
+document.querySelector('#enterBtn').onclick=toggleCar;
+document.querySelector('#jumpBtn').onclick=()=>{if(!inCar)player.position.y=.8;setTimeout(()=>player.position.y=0,350)};
+function toggleCar(){if(!inCar&&player.position.distanceTo(car.position)<4){inCar=true;player.visible=false;toast('Ты сел в машину!')}else if(inCar){inCar=false;player.visible=true;player.position.copy(car.position).add(new THREE.Vector3(2,0,0));toast('Ты вышел из машины')}else toast('Подойди ближе к машине')}
+function toast(t){let el=document.querySelector('#toast');el.textContent=t;el.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>el.style.display='none',1700)}
+const panel=document.querySelector('#panel'),choices=document.querySelector('#choices'),title=document.querySelector('#panelTitle');
+window.openPanel=(type)=>{panel.style.display='flex';choices.innerHTML='';
+ if(type==='garage'){title.textContent='🛠 Гараж и тюнинг';
+ const add=(label,sub,fn)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=label+'<span>'+sub+'</span>';b.onclick=fn;choices.appendChild(b)};
+ add('🚘 Текущая модель',vehicleDefs[selectedVehicle].name+' — '+vehicleDefs[selectedVehicle].type,()=>toast(vehicleDefs[selectedVehicle].name+' в гараже'));
+ [[0xc52c28,'Красный'],[0x2366c7,'Синий'],[0x24945b,'Зелёный'],[0xe4e6e8,'Белый'],[0x17191d,'Чёрный'],[0xd6a52b,'Золотой']].forEach(([c,n])=>add('🎨 '+n,'Цвет кузова',()=>{garage.color=c;applyGarage();toast('Цвет изменён')}));
+ [[0xb8c1ca,'Серебристые'],[0x17191d,'Чёрные'],[0xc79a42,'Золотые']].forEach(([c,n])=>add('🛞 '+n,'Диски',()=>{garage.rim=c;applyGarage();toast('Диски изменены')}));
+ add('⬇ Подвеска ниже','Спортивная посадка',()=>{garage.ride=-.45;applyGarage();toast('Подвеска занижена')});
+ add('⬆ Подвеска выше','Увеличенный клиренс',()=>{garage.ride=.45;applyGarage();toast('Подвеска поднята')});
+ add('💾 Сохранить сборку','Сохранить настройки на этом устройстве',saveGarage);
+ return;}
+ if(type==='settings'){title.textContent='🎮 Управление и графика';const add=(label,sub,fn)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=label+'<span>'+sub+'</span>';b.onclick=fn;choices.appendChild(b)};add('Экономная графика','Для старых и слабых телефонов',()=>applyQuality('low'));add('Высокая графика','Баланс качества и плавности',()=>applyQuality('high'));add('Максимальная графика','Для мощных телефонов и планшетов',()=>applyQuality('ultra'));add('Полный экран','Развернуть игру',()=>{if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>toast('Полный экран недоступен в этом браузере'));else toast('Полный экран не поддерживается')});add('Геймпад','Подключи Bluetooth-геймпад в настройках устройства, затем нажми кнопку на нём',()=>toast(navigator.getGamepads?'Ожидаю нажатия кнопки геймпада':'Gamepad API не поддерживается'));return;}
+ if(type==='cars'){
+  title.textContent='🚘 Автопарк — 7 моделей';
+  vehicleDefs.forEach((v,i)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=v.name+'<span>'+v.type+'</span>';b.onclick=()=>{selectedVehicle=i;garage.color=v.color;applyGarage();saveGarage();toast(v.name+' выбран');};choices.appendChild(b)});
+  return;
+ }
+ let data={maps:['Город','Вечерний город','Ночной город'],skins:['Бирюзовая одежда','Красная одежда','Золотая одежда'],mods:['Машины: ВКЛ','Карты: ВКЛ','Скины: ВКЛ']}[type];title.textContent={maps:'🗺 Выбор карты',skins:'👕 Выбор скина',mods:'⚙ Встроенные моды'}[type];
+ data.forEach((name,i)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=name+'<span>Нажми, чтобы применить</span>';b.onclick=()=>{if(type==='maps'){let c=[0x91b8d0,0xe8a46d,0x17243e][i];scene.background.setHex(c);scene.fog.color.setHex(c);toast(name+' загружена')}if(type==='skins'){let c=[0x22a6a1,0xb83232,0xc69b26][i];mats.shirt.color.setHex(c);toast(name+' применён')}if(type==='mods')toast(name);};choices.appendChild(b)})};
+window.closePanel=()=>panel.style.display='none';
+function update(dt){let forward=keys['w']||keys['arrowup'],back=keys['s']||keys['arrowdown'],left=keys['a']||keys['arrowleft'],right=keys['d']||keys['arrowright'];
+ if(inCar){if(forward)speed=Math.min(speed+dt*10,18);else if(back)speed=Math.max(speed-dt*14,-7);else speed*=.96;if(left)car.rotation.y+=dt*(speed>=0?1:-1)*1.7;if(right)car.rotation.y-=dt*(speed>=0?1:-1)*1.7;car.position.x+=Math.sin(car.rotation.y)*speed*dt;car.position.z+=Math.cos(car.rotation.y)*speed*dt;wheels.forEach(w=>w.rotation.x+=speed*dt*2)}
+ else{let v=8*dt,dx=(right?1:0)-(left?1:0),dz=(back?1:0)-(forward?1:0);if(dx||dz){let a=Math.atan2(dx,dz);player.rotation.y=a;player.position.x+=Math.sin(a)*v;player.position.z+=Math.cos(a)*v}}
+ let target=inCar?car.position:player.position;let angle=inCar?car.rotation.y:player.rotation.y;let desired=new THREE.Vector3(target.x-Math.sin(angle)*9, target.y+5.5, target.z-Math.cos(angle)*9);camera.position.lerp(desired,.09);camera.lookAt(target.x,target.y+1.2,target.z);
+}
+// Gamepad API: Xbox / PlayStation / универсальные Bluetooth-контроллеры.
+let gamepadSeen=false;
+function pollGamepad(){const pads=navigator.getGamepads?navigator.getGamepads():[];const gp=Array.from(pads||[]).find(Boolean);if(!gp)return;gamepadSeen=true;const ax=gp.axes||[];const btn=gp.buttons||[];const dead=.22;const lx=Math.abs(ax[0]||0)>dead?ax[0]:0;const ly=Math.abs(ax[1]||0)>dead?ax[1]:0;
+ keys['arrowup']=ly<-.25||!!(btn[7]&&btn[7].pressed);keys['arrowdown']=ly>.25||!!(btn[6]&&btn[6].pressed);keys['arrowleft']=lx<-.25;keys['arrowright']=lx>.25;
+ if(btn[0]?.pressed&&!pollGamepad.a){pollGamepad.a=true;if(!inCar)document.querySelector('#jumpBtn').click();}if(!btn[0]?.pressed)pollGamepad.a=false;
+ if((btn[2]?.pressed||btn[1]?.pressed)&&!pollGamepad.b){pollGamepad.b=true;toggleCar();}if(!btn[2]?.pressed&&!btn[1]?.pressed)pollGamepad.b=false;
+}
+window.addEventListener('gamepadconnected',()=>toast('Геймпад подключён'));window.addEventListener('gamepaddisconnected',()=>toast('Геймпад отключён'));
+applyQuality(quality);
+let last=performance.now(),frameCount=0;function loop(now){let dt=Math.min((now-last)/1000,.04);last=now;pollGamepad();update(dt);renderer.render(scene,camera);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+toast('Добро пожаловать в GTA Web Mods!');
+</script>
+</body></html>

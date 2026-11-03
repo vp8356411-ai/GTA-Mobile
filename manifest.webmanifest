@@ -1,0 +1,10 @@
+{
+  "name": "GTA Web Mods Mobile",
+  "short_name": "GTA Web Mods",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#10151d",
+  "theme_color": "#101a28",
+  "description": "Мобильная 3D-игра с гаражом и управлением геймпадом"
+}
