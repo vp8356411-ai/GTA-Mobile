@@ -274,3 +274,11 @@ function update(dt) {
   camera.position.lerp(desired, 0.09);
   camera.lookAt(target.x, target.y + 1.2, target.z);
 }
+window.addEventListener('gamepadconnected',()=>toast('Геймпад подключён'));window.addEventListener('gamepaddisconnected',()=>toast('Геймпад отключён'));
+applyQuality(quality);
+let last=performance.now(),frameCount=0;function loop(now){let dt=Math.min((now-last)/1000,.04);last=now;pollGamepad();update(dt);renderer.render(scene,camera);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+toast('Добро пожаловать в GTA Web Mods!');
+</script>
+</body></html>
