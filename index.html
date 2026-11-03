@@ -230,26 +230,47 @@ window.closePanel=()=>panel.style.display='none';
 function update(dt)let walkTime = 0;{let forward=keys['w']||keys['arrowup'],back=keys['s']||keys['arrowdown'],left=keys['a']||keys['arrowleft'],right=keys['d']||keys['arrowright'];
  if(inCar){if(forward)speed=Math.min(speed+dt*10,18);else if(back)speed=Math.max(speed-dt*14,-7);else speed*=.96;if(left)car.rotation.y+=dt*(speed>=0?1:-1)*1.7;if(right)car.rotation.y-=dt*(speed>=0?1:-1)*1.7;car.position.x+=Math.sin(car.rotation.y)*speed*dt;car.position.z+=Math.cos(car.rotation.y)*speed*dt;wheels.forEach(w=>w.rotation.x+=speed*dt*2)}
  else{let v=8*dt,dx=(right?1:0)-(left?1:0),dz=(back?1:0)-(forward?1:0);if(dx||dz){let a=Math.atan2(dx,dz);player.rotation.y=a;player.position.x+=Math.sin(a)*v;player.position.z+=Math.cos(a)*v}}let moving = !!(dx || dz);
-let parts = player.children[0].children;
 
-if (moving) walkTime += dt * 10;
+function update(dt) {
+  let forward = keys['w'] || keys['arrowup'];
+  let back = keys['s'] || keys['arrowdown'];
+  let left = keys['a'] || keys['arrowleft'];
+  let right = keys['d'] || keys['arrowright'];
 
-let swing = moving ? Math.sin(walkTime) * 0.55 : 0;
+  if (inCar) {
+    if (forward) speed = Math.min(speed + dt * 10, 18);
+    else if (back) speed = Math.max(speed - dt * 14, -7);
+    else speed *= 0.96;
 
- let target=inCar?car.position:player.position;let angle=inCar?car.rotation.y:player.rotation.y;let desired=new THREE.Vector3(target.x-Math.sin(angle)*9, target.y+5.5, target.z-Math.cos(angle)*9);camera.position.lerp(desired,.09);camera.lookAt(target.x,target.y+1.2,target.z);
+    if (left) car.rotation.y += dt * (speed >= 0 ? 1 : -1) * 1.7;
+    if (right) car.rotation.y -= dt * (speed >= 0 ? 1 : -1) * 1.7;
+
+    car.position.x += Math.sin(car.rotation.y) * speed * dt;
+    car.position.z += Math.cos(car.rotation.y) * speed * dt;
+
+    wheels.forEach(w => w.rotation.x += speed * dt * 2);
+  } else {
+    let v = 8 * dt;
+    let dx = (right ? 1 : 0) - (left ? 1 : 0);
+    let dz = (back ? 1 : 0) - (forward ? 1 : 0);
+
+    if (dx || dz) {
+      let a = Math.atan2(dx, dz);
+      player.rotation.y = a;
+      player.position.x += Math.sin(a) * v;
+      player.position.z += Math.cos(a) * v;
+    }
+  }
+
+  let target = inCar ? car.position : player.position;
+  let angle = inCar ? car.rotation.y : player.rotation.y;
+
+  let desired = new THREE.Vector3(
+    target.x - Math.sin(angle) * 9,
+    target.y + 5.5,
+    target.z - Math.cos(angle) * 9
+  );
+
+  camera.position.lerp(desired, 0.09);
+  camera.lookAt(target.x, target.y + 1.2, target.z);
 }
-// Gamepad API: Xbox / PlayStation / универсальные Bluetooth-контроллеры.
-let gamepadSeen=false;
-function pollGamepad(){const pads=navigator.getGamepads?navigator.getGamepads():[];const gp=Array.from(pads||[]).find(Boolean);if(!gp)return;gamepadSeen=true;const ax=gp.axes||[];const btn=gp.buttons||[];const dead=.22;const lx=Math.abs(ax[0]||0)>dead?ax[0]:0;const ly=Math.abs(ax[1]||0)>dead?ax[1]:0;
- keys['arrowup']=ly<-.25||!!(btn[7]&&btn[7].pressed);keys['arrowdown']=ly>.25||!!(btn[6]&&btn[6].pressed);keys['arrowleft']=lx<-.25;keys['arrowright']=lx>.25;
- if(btn[0]?.pressed&&!pollGamepad.a){pollGamepad.a=true;if(!inCar)document.querySelector('#jumpBtn').click();}if(!btn[0]?.pressed)pollGamepad.a=false;
- if((btn[2]?.pressed||btn[1]?.pressed)&&!pollGamepad.b){pollGamepad.b=true;toggleCar();}if(!btn[2]?.pressed&&!btn[1]?.pressed)pollGamepad.b=false;
-}
-window.addEventListener('gamepadconnected',()=>toast('Геймпад подключён'));window.addEventListener('gamepaddisconnected',()=>toast('Геймпад отключён'));
-applyQuality(quality);
-=requestAnimationFrame(loop)}requestAnimationFrame(loop);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-if('serviceWorker' in navigator && location.protocol.startsWith('http')){addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
-toast('Добро пожаловать в GTA Web Mods!');
-</script>
-</body></html>
