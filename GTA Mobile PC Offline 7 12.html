@@ -8,21 +8,39 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GTA Mobile">
 <title>GTA Mobile — 7 12 Models</title>
+<script>
+(function(){
+// Хранилище: если localStorage заблокирован (приватный режим, file://), игра работает с памятью
+try{var k='__t';localStorage.setItem(k,k);localStorage.removeItem(k)}catch(e){
+ var mem={},st={getItem:function(x){return Object.prototype.hasOwnProperty.call(mem,x)?mem[x]:null},setItem:function(x,v){mem[x]=String(v)},removeItem:function(x){delete mem[x]},clear:function(){mem={}}};
+ try{Object.defineProperty(window,'localStorage',{value:st,configurable:true})}catch(e2){}
+}
+// Сообщение, если игра не запустилась
+window.__gtaFail=function(err){
+ if(window.__gtaStarted&&!err)return;
+ var d=document.getElementById('bootmsg');if(!d)return;
+ var webgl=false;try{var c=document.createElement('canvas');webgl=!!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl')))}catch(x){}
+ d.style.display='flex';
+ d.innerHTML='<div><b>Не удалось запустить игру</b><br><br>'+(webgl?'Обновите браузер до последней версии (Chrome, Firefox, Safari, Edge) и откройте файл снова.':'В браузере выключен или не поддерживается WebGL. Включите аппаратное ускорение в настройках браузера или откройте файл в Chrome/Firefox/Safari.')+(err&&err.message?'<br><br><small style="opacity:.6">'+String(err.message).replace(/</g,'&lt;')+'</small>':'')+'</div>';
+};
+window.addEventListener('error',function(ev){if(!window.__gtaStarted)window.__gtaFail(ev.error||{message:ev.message})});
+})();
+</script>
 <style>
 :root{--glass:#101a28dd;--line:#ffffff38;--cyan:#8ee6ff}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10151d;color:#fff;font-family:Arial,sans-serif;touch-action:none}
-#game{position:absolute;inset:0}canvas{display:block;width:100%;height:100%}
-#top{position:absolute;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:2}
+#game{position:absolute;top:0;left:0;right:0;bottom:0}canvas{display:block;width:100%;height:100%}
+#top{position:absolute;top:12px;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:2}
 .logo{font-weight:900;letter-spacing:1px;text-shadow:0 2px 8px #000;font-size:18px}.logo small{display:block;font-size:10px;color:var(--cyan);letter-spacing:2px;margin-top:3px}
 #hint{background:#0009;padding:9px 11px;border-radius:10px;font-size:11px;line-height:1.45;max-width:54%;text-align:right}
 #menu{position:absolute;right:10px;top:82px;display:flex;gap:6px;flex-direction:column;z-index:3}
 button{border:1px solid var(--line);background:var(--glass);color:#fff;border-radius:11px;padding:10px 12px;font-weight:bold;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:13px}
 button:active{transform:scale(.97);background:#24405b}
-#panel{display:none;position:absolute;inset:0;background:#000b;align-items:center;justify-content:center;padding:18px;z-index:10;touch-action:auto}
-.card{width:min(460px,100%);max-height:min(78dvh,680px);overflow:auto;background:#172231;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 20px 70px #000}
+#panel{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:#000b;align-items:center;justify-content:center;padding:18px;z-index:10;touch-action:auto}
+.card{width:460px;max-width:100%;width:min(460px,100%);max-height:520px;max-height:min(78vh,680px);max-height:min(78dvh,680px);overflow:auto;background:#172231;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 20px 70px #000}
 .card h2{margin:0 0 14px;font-size:20px}.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .choice{padding:12px;text-align:left;min-height:60px}.choice span{display:block;color:#aab8c9;font-size:11px;margin-top:5px;font-weight:normal;line-height:1.3}
-#controls{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;pointer-events:none;z-index:2}
+#controls{position:absolute;bottom:14px;bottom:max(14px,env(safe-area-inset-bottom));left:12px;right:12px;display:flex;justify-content:space-between;align-items:end;pointer-events:none;z-index:2}
 .pad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,44px);gap:5px;pointer-events:auto}
 .pad button,.action button{background:#101a28bb;touch-action:none;user-select:none;-webkit-user-select:none}
 .pad button{font-size:18px;padding:0}.action{display:flex;gap:7px;pointer-events:auto}.action button{min-width:62px;min-height:53px;padding:8px 9px}.action{gap:5px}.action button{min-width:56px}
@@ -45,6 +63,8 @@ button:active{transform:scale(.97);background:#24405b}
 </style>
 </head>
 <body>
+<noscript><div style="position:fixed;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;background:#10151d;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:20px">Для игры нужен включённый JavaScript.</div></noscript>
+<div id="bootmsg" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;z-index:99;align-items:center;justify-content:center;background:#10151d;color:#fff;font-family:Arial,sans-serif;text-align:center;padding:24px;line-height:1.5"></div>
 <div id="game"></div>
 <div id="top">
  <div class="logo">GTA MOBILE<small>OPEN WORLD • MOBILE EDITION V3.21</small></div>
@@ -72,7 +92,9 @@ button:active{transform:scale(.97);background:#24405b}
  </div>
 </div>
 <div id="toast"></div>
-<script id="three-src" type="text/plain">/**
+<script id="three-src">
+(function(){"use strict";
+/**
  * @license
  * Copyright 2010-2023 Three.js Authors
  * SPDX-License-Identifier: MIT
@@ -53115,15 +53137,15 @@ if ( typeof window !== 'undefined' ) {
 
 }
 
-export { ACESFilmicToneMapping, AddEquation, AddOperation, AdditiveAnimationBlendMode, AdditiveBlending, AgXToneMapping, AlphaFormat, AlwaysCompare, AlwaysDepth, AlwaysStencilFunc, AmbientLight, AnimationAction, AnimationClip, AnimationLoader, AnimationMixer, AnimationObjectGroup, AnimationUtils, ArcCurve, ArrayCamera, ArrowHelper, AttachedBindMode, Audio, AudioAnalyser, AudioContext, AudioListener, AudioLoader, AxesHelper, BackSide, BasicDepthPacking, BasicShadowMap, BatchedMesh, Bone, BooleanKeyframeTrack, Box2, Box3, Box3Helper, BoxGeometry, BoxHelper, BufferAttribute, BufferGeometry, BufferGeometryLoader, ByteType, Cache, Camera, CameraHelper, CanvasTexture, CapsuleGeometry, CatmullRomCurve3, CineonToneMapping, CircleGeometry, ClampToEdgeWrapping, Clock, Color, ColorKeyframeTrack, ColorManagement, CompressedArrayTexture, CompressedCubeTexture, CompressedTexture, CompressedTextureLoader, ConeGeometry, ConstantAlphaFactor, ConstantColorFactor, CubeCamera, CubeReflectionMapping, CubeRefractionMapping, CubeTexture, CubeTextureLoader, CubeUVReflectionMapping, CubicBezierCurve, CubicBezierCurve3, CubicInterpolant, CullFaceBack, CullFaceFront, CullFaceFrontBack, CullFaceNone, Curve, CurvePath, CustomBlending, CustomToneMapping, CylinderGeometry, Cylindrical, Data3DTexture, DataArrayTexture, DataTexture, DataTextureLoader, DataUtils, DecrementStencilOp, DecrementWrapStencilOp, DefaultLoadingManager, DepthFormat, DepthStencilFormat, DepthTexture, DetachedBindMode, DirectionalLight, DirectionalLightHelper, DiscreteInterpolant, DisplayP3ColorSpace, DodecahedronGeometry, DoubleSide, DstAlphaFactor, DstColorFactor, DynamicCopyUsage, DynamicDrawUsage, DynamicReadUsage, EdgesGeometry, EllipseCurve, EqualCompare, EqualDepth, EqualStencilFunc, EquirectangularReflectionMapping, EquirectangularRefractionMapping, Euler, EventDispatcher, ExtrudeGeometry, FileLoader, Float16BufferAttribute, Float32BufferAttribute, Float64BufferAttribute, FloatType, Fog, FogExp2, FramebufferTexture, FrontSide, Frustum, GLBufferAttribute, GLSL1, GLSL3, GreaterCompare, GreaterDepth, GreaterEqualCompare, GreaterEqualDepth, GreaterEqualStencilFunc, GreaterStencilFunc, GridHelper, Group, HalfFloatType, HemisphereLight, HemisphereLightHelper, IcosahedronGeometry, ImageBitmapLoader, ImageLoader, ImageUtils, IncrementStencilOp, IncrementWrapStencilOp, InstancedBufferAttribute, InstancedBufferGeometry, InstancedInterleavedBuffer, InstancedMesh, Int16BufferAttribute, Int32BufferAttribute, Int8BufferAttribute, IntType, InterleavedBuffer, InterleavedBufferAttribute, Interpolant, InterpolateDiscrete, InterpolateLinear, InterpolateSmooth, InvertStencilOp, KeepStencilOp, KeyframeTrack, LOD, LatheGeometry, Layers, LessCompare, LessDepth, LessEqualCompare, LessEqualDepth, LessEqualStencilFunc, LessStencilFunc, Light, LightProbe, Line, Line3, LineBasicMaterial, LineCurve, LineCurve3, LineDashedMaterial, LineLoop, LineSegments, LinearDisplayP3ColorSpace, LinearEncoding, LinearFilter, LinearInterpolant, LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, LinearSRGBColorSpace, LinearToneMapping, LinearTransfer, Loader, LoaderUtils, LoadingManager, LoopOnce, LoopPingPong, LoopRepeat, LuminanceAlphaFormat, LuminanceFormat, MOUSE, Material, MaterialLoader, MathUtils, Matrix3, Matrix4, MaxEquation, Mesh, MeshBasicMaterial, MeshDepthMaterial, MeshDistanceMaterial, MeshLambertMaterial, MeshMatcapMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, MinEquation, MirroredRepeatWrapping, MixOperation, MultiplyBlending, MultiplyOperation, NearestFilter, NearestMipMapLinearFilter, NearestMipMapNearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, NeverCompare, NeverDepth, NeverStencilFunc, NoBlending, NoColorSpace, NoToneMapping, NormalAnimationBlendMode, NormalBlending, NotEqualCompare, NotEqualDepth, NotEqualStencilFunc, NumberKeyframeTrack, Object3D, ObjectLoader, ObjectSpaceNormalMap, OctahedronGeometry, OneFactor, OneMinusConstantAlphaFactor, OneMinusConstantColorFactor, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, OrthographicCamera, P3Primaries, PCFShadowMap, PCFSoftShadowMap, PMREMGenerator, Path, PerspectiveCamera, Plane, PlaneGeometry, PlaneHelper, PointLight, PointLightHelper, Points, PointsMaterial, PolarGridHelper, PolyhedronGeometry, PositionalAudio, PropertyBinding, PropertyMixer, QuadraticBezierCurve, QuadraticBezierCurve3, Quaternion, QuaternionKeyframeTrack, QuaternionLinearInterpolant, RED_GREEN_RGTC2_Format, RED_RGTC1_Format, REVISION, RGBADepthPacking, RGBAFormat, RGBAIntegerFormat, RGBA_ASTC_10x10_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_BPTC_Format, RGBA_ETC2_EAC_Format, RGBA_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGB_BPTC_SIGNED_Format, RGB_BPTC_UNSIGNED_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGB_PVRTC_2BPPV1_Format, RGB_PVRTC_4BPPV1_Format, RGB_S3TC_DXT1_Format, RGFormat, RGIntegerFormat, RawShaderMaterial, Ray, Raycaster, Rec709Primaries, RectAreaLight, RedFormat, RedIntegerFormat, ReinhardToneMapping, RenderTarget, RepeatWrapping, ReplaceStencilOp, ReverseSubtractEquation, RingGeometry, SIGNED_RED_GREEN_RGTC2_Format, SIGNED_RED_RGTC1_Format, SRGBColorSpace, SRGBTransfer, Scene, ShaderChunk, ShaderLib, ShaderMaterial, ShadowMaterial, Shape, ShapeGeometry, ShapePath, ShapeUtils, ShortType, Skeleton, SkeletonHelper, SkinnedMesh, Source, Sphere, SphereGeometry, Spherical, SphericalHarmonics3, SplineCurve, SpotLight, SpotLightHelper, Sprite, SpriteMaterial, SrcAlphaFactor, SrcAlphaSaturateFactor, SrcColorFactor, StaticCopyUsage, StaticDrawUsage, StaticReadUsage, StereoCamera, StreamCopyUsage, StreamDrawUsage, StreamReadUsage, StringKeyframeTrack, SubtractEquation, SubtractiveBlending, TOUCH, TangentSpaceNormalMap, TetrahedronGeometry, Texture, TextureLoader, TorusGeometry, TorusKnotGeometry, Triangle, TriangleFanDrawMode, TriangleStripDrawMode, TrianglesDrawMode, TubeGeometry, TwoPassDoubleSide, UVMapping, Uint16BufferAttribute, Uint32BufferAttribute, Uint8BufferAttribute, Uint8ClampedBufferAttribute, Uniform, UniformsGroup, UniformsLib, UniformsUtils, UnsignedByteType, UnsignedInt248Type, UnsignedIntType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShortType, VSMShadowMap, Vector2, Vector3, Vector4, VectorKeyframeTrack, VideoTexture, WebGL1Renderer, WebGL3DRenderTarget, WebGLArrayRenderTarget, WebGLCoordinateSystem, WebGLCubeRenderTarget, WebGLMultipleRenderTargets, WebGLRenderTarget, WebGLRenderer, WebGLUtils, WebGPUCoordinateSystem, WireframeGeometry, WrapAroundEnding, ZeroCurvatureEnding, ZeroFactor, ZeroSlopeEnding, ZeroStencilOp, _SRGBAFormat, createCanvasElement, sRGBEncoding };
-</script>
-<script type="module">
-const THREE = await (async()=>{
-  // Офлайн: Three.js встроен в <script id="three-src"> (см. make_offline.py). Иначе — CDN.
-  const el=document.getElementById('three-src');
-  if(el){const u=URL.createObjectURL(new Blob([el.textContent],{type:'text/javascript'}));return import(u)}
-  return import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js');
+window.THREE = { ACESFilmicToneMapping, AddEquation, AddOperation, AdditiveAnimationBlendMode, AdditiveBlending, AgXToneMapping, AlphaFormat, AlwaysCompare, AlwaysDepth, AlwaysStencilFunc, AmbientLight, AnimationAction, AnimationClip, AnimationLoader, AnimationMixer, AnimationObjectGroup, AnimationUtils, ArcCurve, ArrayCamera, ArrowHelper, AttachedBindMode, Audio, AudioAnalyser, AudioContext, AudioListener, AudioLoader, AxesHelper, BackSide, BasicDepthPacking, BasicShadowMap, BatchedMesh, Bone, BooleanKeyframeTrack, Box2, Box3, Box3Helper, BoxGeometry, BoxHelper, BufferAttribute, BufferGeometry, BufferGeometryLoader, ByteType, Cache, Camera, CameraHelper, CanvasTexture, CapsuleGeometry, CatmullRomCurve3, CineonToneMapping, CircleGeometry, ClampToEdgeWrapping, Clock, Color, ColorKeyframeTrack, ColorManagement, CompressedArrayTexture, CompressedCubeTexture, CompressedTexture, CompressedTextureLoader, ConeGeometry, ConstantAlphaFactor, ConstantColorFactor, CubeCamera, CubeReflectionMapping, CubeRefractionMapping, CubeTexture, CubeTextureLoader, CubeUVReflectionMapping, CubicBezierCurve, CubicBezierCurve3, CubicInterpolant, CullFaceBack, CullFaceFront, CullFaceFrontBack, CullFaceNone, Curve, CurvePath, CustomBlending, CustomToneMapping, CylinderGeometry, Cylindrical, Data3DTexture, DataArrayTexture, DataTexture, DataTextureLoader, DataUtils, DecrementStencilOp, DecrementWrapStencilOp, DefaultLoadingManager, DepthFormat, DepthStencilFormat, DepthTexture, DetachedBindMode, DirectionalLight, DirectionalLightHelper, DiscreteInterpolant, DisplayP3ColorSpace, DodecahedronGeometry, DoubleSide, DstAlphaFactor, DstColorFactor, DynamicCopyUsage, DynamicDrawUsage, DynamicReadUsage, EdgesGeometry, EllipseCurve, EqualCompare, EqualDepth, EqualStencilFunc, EquirectangularReflectionMapping, EquirectangularRefractionMapping, Euler, EventDispatcher, ExtrudeGeometry, FileLoader, Float16BufferAttribute, Float32BufferAttribute, Float64BufferAttribute, FloatType, Fog, FogExp2, FramebufferTexture, FrontSide, Frustum, GLBufferAttribute, GLSL1, GLSL3, GreaterCompare, GreaterDepth, GreaterEqualCompare, GreaterEqualDepth, GreaterEqualStencilFunc, GreaterStencilFunc, GridHelper, Group, HalfFloatType, HemisphereLight, HemisphereLightHelper, IcosahedronGeometry, ImageBitmapLoader, ImageLoader, ImageUtils, IncrementStencilOp, IncrementWrapStencilOp, InstancedBufferAttribute, InstancedBufferGeometry, InstancedInterleavedBuffer, InstancedMesh, Int16BufferAttribute, Int32BufferAttribute, Int8BufferAttribute, IntType, InterleavedBuffer, InterleavedBufferAttribute, Interpolant, InterpolateDiscrete, InterpolateLinear, InterpolateSmooth, InvertStencilOp, KeepStencilOp, KeyframeTrack, LOD, LatheGeometry, Layers, LessCompare, LessDepth, LessEqualCompare, LessEqualDepth, LessEqualStencilFunc, LessStencilFunc, Light, LightProbe, Line, Line3, LineBasicMaterial, LineCurve, LineCurve3, LineDashedMaterial, LineLoop, LineSegments, LinearDisplayP3ColorSpace, LinearEncoding, LinearFilter, LinearInterpolant, LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearMipmapLinearFilter, LinearMipmapNearestFilter, LinearSRGBColorSpace, LinearToneMapping, LinearTransfer, Loader, LoaderUtils, LoadingManager, LoopOnce, LoopPingPong, LoopRepeat, LuminanceAlphaFormat, LuminanceFormat, MOUSE, Material, MaterialLoader, MathUtils, Matrix3, Matrix4, MaxEquation, Mesh, MeshBasicMaterial, MeshDepthMaterial, MeshDistanceMaterial, MeshLambertMaterial, MeshMatcapMaterial, MeshNormalMaterial, MeshPhongMaterial, MeshPhysicalMaterial, MeshStandardMaterial, MeshToonMaterial, MinEquation, MirroredRepeatWrapping, MixOperation, MultiplyBlending, MultiplyOperation, NearestFilter, NearestMipMapLinearFilter, NearestMipMapNearestFilter, NearestMipmapLinearFilter, NearestMipmapNearestFilter, NeverCompare, NeverDepth, NeverStencilFunc, NoBlending, NoColorSpace, NoToneMapping, NormalAnimationBlendMode, NormalBlending, NotEqualCompare, NotEqualDepth, NotEqualStencilFunc, NumberKeyframeTrack, Object3D, ObjectLoader, ObjectSpaceNormalMap, OctahedronGeometry, OneFactor, OneMinusConstantAlphaFactor, OneMinusConstantColorFactor, OneMinusDstAlphaFactor, OneMinusDstColorFactor, OneMinusSrcAlphaFactor, OneMinusSrcColorFactor, OrthographicCamera, P3Primaries, PCFShadowMap, PCFSoftShadowMap, PMREMGenerator, Path, PerspectiveCamera, Plane, PlaneGeometry, PlaneHelper, PointLight, PointLightHelper, Points, PointsMaterial, PolarGridHelper, PolyhedronGeometry, PositionalAudio, PropertyBinding, PropertyMixer, QuadraticBezierCurve, QuadraticBezierCurve3, Quaternion, QuaternionKeyframeTrack, QuaternionLinearInterpolant, RED_GREEN_RGTC2_Format, RED_RGTC1_Format, REVISION, RGBADepthPacking, RGBAFormat, RGBAIntegerFormat, RGBA_ASTC_10x10_Format, RGBA_ASTC_10x5_Format, RGBA_ASTC_10x6_Format, RGBA_ASTC_10x8_Format, RGBA_ASTC_12x10_Format, RGBA_ASTC_12x12_Format, RGBA_ASTC_4x4_Format, RGBA_ASTC_5x4_Format, RGBA_ASTC_5x5_Format, RGBA_ASTC_6x5_Format, RGBA_ASTC_6x6_Format, RGBA_ASTC_8x5_Format, RGBA_ASTC_8x6_Format, RGBA_ASTC_8x8_Format, RGBA_BPTC_Format, RGBA_ETC2_EAC_Format, RGBA_PVRTC_2BPPV1_Format, RGBA_PVRTC_4BPPV1_Format, RGBA_S3TC_DXT1_Format, RGBA_S3TC_DXT3_Format, RGBA_S3TC_DXT5_Format, RGB_BPTC_SIGNED_Format, RGB_BPTC_UNSIGNED_Format, RGB_ETC1_Format, RGB_ETC2_Format, RGB_PVRTC_2BPPV1_Format, RGB_PVRTC_4BPPV1_Format, RGB_S3TC_DXT1_Format, RGFormat, RGIntegerFormat, RawShaderMaterial, Ray, Raycaster, Rec709Primaries, RectAreaLight, RedFormat, RedIntegerFormat, ReinhardToneMapping, RenderTarget, RepeatWrapping, ReplaceStencilOp, ReverseSubtractEquation, RingGeometry, SIGNED_RED_GREEN_RGTC2_Format, SIGNED_RED_RGTC1_Format, SRGBColorSpace, SRGBTransfer, Scene, ShaderChunk, ShaderLib, ShaderMaterial, ShadowMaterial, Shape, ShapeGeometry, ShapePath, ShapeUtils, ShortType, Skeleton, SkeletonHelper, SkinnedMesh, Source, Sphere, SphereGeometry, Spherical, SphericalHarmonics3, SplineCurve, SpotLight, SpotLightHelper, Sprite, SpriteMaterial, SrcAlphaFactor, SrcAlphaSaturateFactor, SrcColorFactor, StaticCopyUsage, StaticDrawUsage, StaticReadUsage, StereoCamera, StreamCopyUsage, StreamDrawUsage, StreamReadUsage, StringKeyframeTrack, SubtractEquation, SubtractiveBlending, TOUCH, TangentSpaceNormalMap, TetrahedronGeometry, Texture, TextureLoader, TorusGeometry, TorusKnotGeometry, Triangle, TriangleFanDrawMode, TriangleStripDrawMode, TrianglesDrawMode, TubeGeometry, TwoPassDoubleSide, UVMapping, Uint16BufferAttribute, Uint32BufferAttribute, Uint8BufferAttribute, Uint8ClampedBufferAttribute, Uniform, UniformsGroup, UniformsLib, UniformsUtils, UnsignedByteType, UnsignedInt248Type, UnsignedIntType, UnsignedShort4444Type, UnsignedShort5551Type, UnsignedShortType, VSMShadowMap, Vector2, Vector3, Vector4, VectorKeyframeTrack, VideoTexture, WebGL1Renderer, WebGL3DRenderTarget, WebGLArrayRenderTarget, WebGLCoordinateSystem, WebGLCubeRenderTarget, WebGLMultipleRenderTargets, WebGLRenderTarget, WebGLRenderer, WebGLUtils, WebGPUCoordinateSystem, WireframeGeometry, WrapAroundEnding, ZeroCurvatureEnding, ZeroFactor, ZeroSlopeEnding, ZeroStencilOp, _SRGBAFormat, createCanvasElement, sRGBEncoding };
+
 })();
+</script>
+<script>
+(function(){"use strict";
+try{
+
+const THREE = window.THREE;
 
 const root=document.querySelector('#game');
 const scene=new THREE.Scene();
@@ -53811,12 +53833,40 @@ function bindHold(el,key){
 }
 document.querySelectorAll('[data-key]').forEach(b=>bindHold(b,b.dataset.key));
 document.querySelector('#enterBtn').onclick=toggleCar;
-document.querySelector('#jumpBtn').onclick=()=>{if(!inCar&&!player.userData.jumping){player.userData.jumping=true;player.position.y=.85;setTimeout(()=>{player.position.y=0;player.userData.jumping=false},380)}};
+document.querySelector('#jumpBtn').onclick=()=>{if(!inCar&&!player.userData.jumping){player.userData.jumping=true;player.userData.vy=6.4}};
 document.querySelector('#hornBtn').addEventListener('click',()=>{if(hornCooldown>0)return;playHorn();hornCooldown=.42;toast('Сигнал!')});
+// Можно садиться в любую машину: трафик, брошенные ранее машины и свою.
+let borrowed=null,ownSaved=null,ownWheels=null;const parkedCars=[];
+function findCarNear(){
+ const pp=player.position;let best=null,bd=5;
+ if(!ownSaved){const d=pp.distanceTo(car.position);if(d<bd){bd=d;best={k:'own'}}}
+ for(const t of traffic){const d=pp.distanceTo(t.g.position);if(d<bd){bd=d;best={k:'traffic',t}}}
+ for(const p of parkedCars){const d=pp.distanceTo(p.g.position);if(d<bd){bd=d;best={k:'parked',p}}}
+ return best}
+function syncBorrowed(){if(borrowed&&inCar){borrowed.g.position.set(car.position.x,0,car.position.z);borrowed.g.rotation.y=car.rotation.y}}
 function toggleCar(){
- if(!inCar&&player.position.distanceTo(car.position)<5){inCar=true;player.visible=false;speed=0;toast('Ты сел в машину!')}
- else if(inCar){inCar=false;player.visible=true;player.position.copy(car.position).add(new THREE.Vector3(2,0,0));speed=0;toast('Ты вышел из машины')}
- else toast('Подойди ближе к машине');
+ if(!inCar){
+  const c=findCarNear();
+  if(!c){toast('Подойди ближе к машине');return}
+  if(c.k!=='own'){
+   let g,w;
+   if(c.k==='traffic'){const t=c.t;g=t.g;w=t.wheels;traffic.splice(traffic.indexOf(t),1);
+    const col=g.children[0].material.color.getHex();
+    if(t.axis==='x')makeTrafficCar(t.sign>0?-300:300,t.base,t.dir,col);else makeTrafficCar(t.base,t.sign>0?-300:300,t.dir,col)}
+   else{g=c.p.g;w=c.p.wheels;parkedCars.splice(parkedCars.indexOf(c.p),1)}
+   ownSaved={x:car.position.x,z:car.position.z,ry:car.rotation.y};ownWheels=wheels;
+   car.visible=false;car.position.set(g.position.x,0,g.position.z);car.rotation.y=g.rotation.y;
+   borrowed={g,wheels:w};wheels=w;
+  }
+  inCar=true;player.visible=false;player.userData.jumping=false;player.userData.vy=0;player.position.y=0;speed=0;toast('Ты сел в машину!')}
+ else{
+  inCar=false;player.visible=true;
+  if(borrowed){
+   player.position.set(car.position.x+Math.cos(car.rotation.y)*2.4,0,car.position.z-Math.sin(car.rotation.y)*2.4);
+   syncBorrowed();parkedCars.push(borrowed);borrowed=null;
+   car.position.set(ownSaved.x,0,ownSaved.z);car.rotation.y=ownSaved.ry;car.visible=true;wheels=ownWheels||wheels;ownSaved=null;
+  }else player.position.copy(car.position).add(new THREE.Vector3(2,0,0));
+  speed=0;toast('Ты вышел из машины')}
 }
 const panel=document.querySelector('#panel'),choices=document.querySelector('#choices'),title=document.querySelector('#panelTitle');
 window.closePanel=()=>panel.style.display='none';
@@ -53902,10 +53952,15 @@ function update(dt){
    player.rotation.y+=d*Math.min(1,dt*12);
    const v=4.6*dt*(1-Math.min(Math.abs(d),1.5)/3);
    player.position.x+=Math.sin(player.rotation.y)*v;player.position.z+=Math.cos(player.rotation.y)*v}
+  // Физика прыжка: импульс вверх + гравитация, можно прыгать на бегу
+  if(player.userData.jumping){const u=player.userData;u.vy-=18*dt;player.position.y+=u.vy*dt;
+   if(player.position.y<=0){player.position.y=0;u.vy=0;u.jumping=false}}
   // Походка как у пешеходов: ноги и руки качаются в противофазе
   playerAmp+=((moving?.5:0)-playerAmp)*Math.min(1,dt*10);if(moving)playerWalk+=dt*10;
   const gait=Math.sin(playerWalk)*playerAmp;
-  if(playerLegs.length===2){playerLegs[0].rotation.x=gait;playerLegs[1].rotation.x=-gait;playerArms[0].rotation.x=-gait*1.3;playerArms[1].rotation.x=gait*1.3}
+  if(playerLegs.length===2){
+   if(player.userData.jumping){const up=player.userData.vy>0;playerLegs[0].rotation.x=up?-.7:.35;playerLegs[1].rotation.x=up?.25:-.35;playerArms[0].rotation.x=playerArms[1].rotation.x=up?-1.6:-.5}
+   else{playerLegs[0].rotation.x=gait;playerLegs[1].rotation.x=-gait;playerArms[0].rotation.x=-gait*1.3;playerArms[1].rotation.x=gait*1.3}}
  }
  trafficClock.time=(trafficClock.time+dt)%24;
  updateSignalVisuals();
@@ -54274,7 +54329,7 @@ MISSIONS.forEach((m,i)=>{m.t=m.t.replace(/^\d+\.\s*/,'');m.t=(i+1)+'. '+m.t});
 }
 if(msave.idx<MISSIONS.length)setTimeout(()=>{if(!cur)startMission(msave.idx)},3000);
 let last=performance.now();
-function loop(now){const dt=Math.min((now-last)/1000,.04);last=now;pollGamepad();update(dt);resolveCollisions(dt);updateMissions(dt);updateWanted(dt);updateEnvironment(dt);updateAudio(dt);renderer.render(scene,camera);requestAnimationFrame(loop)}
+function loop(now){const dt=Math.min((now-last)/1000,.04);last=now;pollGamepad();update(dt);resolveCollisions(dt);updateMissions(dt);updateWanted(dt);updateEnvironment(dt);updateAudio(dt);syncBorrowed();renderer.render(scene,camera);requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 toast('Добро пожаловать в GTA Mobile V3.21! Новые детализированные модели машин и людей. Нажми на экран для звука');
@@ -54290,11 +54345,15 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();
  if(e.repeat)return;
  if(k===' ')document.querySelector('#jumpBtn').click();
  else if(k==='h')document.querySelector('#hornBtn').click();
- else if(k==='f'){if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}
+ else if(k==='f'){if(document.fullscreenElement)document.exitFullscreen();else{const de=document.documentElement,rf=de.requestFullscreen||de.webkitRequestFullscreen;if(rf){const r=rf.call(de);if(r&&r.catch)r.catch(()=>{})}}}
  else if(k==='escape')closePanel();
 });
 if(matchMedia('(pointer:fine)').matches){document.querySelectorAll('.pad-lr,.pad-ud').forEach(e=>e.style.display='none');
  const hint=document.querySelector('#hint');if(hint)hint.innerHTML='WASD / ▲▼◀▶ — движение<br>E — сесть/выйти · Пробел — прыжок<br>H — сигнал · F — полный экран · M — меню<br>ЛКМ + мышь — камера';}
+
+window.__gtaStarted=true;
+}catch(err){window.__gtaFail&&window.__gtaFail(err)}
+})();
 </script>
 </body>
 </html>
