@@ -1,10 +1,27 @@
 {
-  "name": "GTA Web Mods Mobile",
-  "short_name": "GTA Web Mods",
-  "start_url": "./",
-  "display": "fullscreen",
-  "orientation": "landscape",
-  "background_color": "#10151d",
-  "theme_color": "#101a28",
-  "description": "Мобильная 3D-игра с гаражом и управлением геймпадом"
+ "name": "GTA Mobile",
+ "short_name": "GTA Mobile",
+ "start_url": "./index.html",
+ "scope": "./",
+ "display": "fullscreen",
+ "display_override": [
+  "fullscreen",
+  "standalone"
+ ],
+ "background_color": "#10151d",
+ "theme_color": "#101a28",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
 }
